@@ -6,11 +6,23 @@ module Carrot::AMQP
     def initialize(carrot, name, opts = {})
       @server = carrot.server
       @opts   = opts
-      @name   = name
       @carrot = carrot
+
+      if(!name)
+        opts = {
+          :passive => false,
+          :durable => false,
+          :exclusive => true,
+          :auto_delete => true
+        }.merge(opts)
+      end
+
       server.send_frame(
-        Protocol::Queue::Declare.new({ :queue => name, :nowait => true }.merge(opts))
+        Protocol::Queue::Declare.new({ :queue => name || '', :nowait => false }.merge(opts))
       )
+
+      method = server.next_method
+      @name = method.queue
     end
 
     def pop(opts = {})

@@ -33,8 +33,11 @@ class Carrot
     @server = AMQP::Server.new(opts)
   end
   
-  def queue(name, opts = {})
-    queues[name] ||= AMQP::Queue.new(self, name, opts)
+  def queue(name = nil, opts = {})
+    return queues[name] if queues.has_key?(name)
+
+    queue = AMQP::Queue.new(self, name, opts)
+    queues[queue.name] = queue
   end
 
   def stop
